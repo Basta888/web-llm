@@ -7,6 +7,7 @@ document.getElementById('send-btn').onclick = async function () {
     "messages": [
       {
         "role": "system",
+      
         "content": `Ты консультант по питанию.\
          Вежливо поприветствуй пользователя \
         Запроси у пользователя данные: пол, возраст, вес и рост.\
@@ -22,7 +23,7 @@ document.getElementById('send-btn').onclick = async function () {
       {
         "role": "user",
         "content": `Это женщина, 37 лет, рост 166 см, вес 112 кг.`
-      }
+      },
 
     ],
     //'max_tokens': '100',
@@ -30,7 +31,23 @@ document.getElementById('send-btn').onclick = async function () {
   }
 
   // Example ollama AI integration 
- try {
+  try {
+    const response = await fetch('http://localhost:11434/api/chat', {
+      method: 'POST',
+      headers: { 
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify(request)
+    });
+    
+    // Read the response as a stream
+    const reader = response.body.getReader();
+    let result = '';
+    const decoder = new TextDecoder();
+    while (true) {
+      const { done, value } = await reader.read();
+      if (done) break;
+      try {
         let chunk = decoder.decode(value, { stream: true });
         let response_chunk = JSON.parse(chunk);
         if (response_chunk.message.content) {
@@ -43,3 +60,16 @@ document.getElementById('send-btn').onclick = async function () {
     }
     console.log(result);
     document.getElementById('response').innerText = result || "No response from AI.";
+  } catch (e){
+    document.getElementById('response').innerText = "Error contacting AI service.";
+    console.log(e);
+  }
+};
+
+// Add Enter key support for textarea
+document.getElementById('user-input').addEventListener('keydown', function(event) {
+  if (event.key === 'Enter' && !event.shiftKey) {
+    event.preventDefault();
+    document.getElementById('send-btn').click();
+  }
+});
