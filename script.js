@@ -25,8 +25,8 @@ document.getElementById('send-btn').onclick = async function () {
       }
 
     ],
-    //'max_tokens': '500',
-    "temperature": "0,5"
+    //'max_tokens': '100',
+    "temperature": "0,7"
   }
 
   // Example ollama AI integration 
